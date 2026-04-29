@@ -1,0 +1,277 @@
+
+:root{
+  --bg-1: #071029;
+  --bg-2: #071a33;
+  --glass-1: rgba(255,255,255,0.04);
+  --glass-2: rgba(255,255,255,0.02);
+  --accent-1: #6EE7F9;
+  --accent-2: #7C4DFF;
+  --muted: rgba(255,255,255,0.68);
+  --muted-2: rgba(255,255,255,0.48);
+  --card-radius: 16px;
+  --transition: 260ms cubic-bezier(.2,.9,.2,1);
+  --shadow-1: 0 8px 30px rgba(2,16,37,0.6);
+  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color-scheme: dark;
+  color: #eaf6ff;
+}
+
+/* =========================
+   قواعد أساسية
+   ========================= */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 400px at 10% 10%, rgba(124,77,255,0.08), transparent 8%),
+    linear-gradient(180deg,var(--bg-1),var(--bg-2));
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:20px;
+  line-height:1.45;
+}
+
+/* =========================
+   حاوية التطبيق
+   ========================= */
+.app{
+  max-width:1200px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  min-height:calc(100vh - 40px);
+  animation:fadeInUp 700ms ease both;
+}
+
+/* =========================
+   شريط علوي
+   ========================= */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  border-radius:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px) saturate(120%);
+  transform:translateZ(0);
+}
+.brand{display:flex;gap:12px;align-items:center}
+.brand .logo{flex:0 0 36px;border-radius:8px}
+.brand-text .title{font-weight:700;font-size:1.05rem}
+.brand-text .subtitle{font-size:0.78rem;color:var(--muted);margin-top:-2px}
+
+/* =========================
+   أزرار عامة
+   ========================= */
+.btn{
+  border:0;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+  transition:transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  background:transparent;
+  color:inherit;
+  letter-spacing:0.2px;
+}
+.btn:hover{transform:translateY(-4px)}
+.btn.primary{
+  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  color:#021025;
+  box-shadow: 0 10px 30px rgba(124,77,255,0.12);
+}
+.btn.ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+/* =========================
+   قسم البطل مع أنيميشن خلفية ناعمة
+   ========================= */
+.hero{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap:20px;
+  align-items:center;
+  padding:18px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  inset:-20% -10% auto auto;
+  width:600px;height:600px;
+  background:radial-gradient(circle at 30% 30%, rgba(110,231,249,0.06), transparent 20%),
+             radial-gradient(circle at 70% 70%, rgba(124,77,255,0.05), transparent 18%);
+  transform:translateX(-10%);
+  animation:heroFloat 8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes heroFloat{
+  0%{transform:translateX(-10%) translateY(0)}
+  50%{transform:translateX(6%) translateY(-8px)}
+  100%{transform:translateX(-10%) translateY(0)}
+}
+.hero-inner{padding:6px 12px}
+.hero-title{font-size:1.9rem;margin:0 0 8px;line-height:1.1}
+.hero-lead{color:var(--muted);margin:0 0 16px}
+.hero-cta{display:flex;gap:12px;align-items:center}
+
+/* بطاقة معاينة */
+.hero-visual{padding:18px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.card-preview{
+  width:100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:12px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 30px rgba(2,16,37,0.45);
+  transform:translateY(0);
+  transition:transform 420ms ease;
+}
+.card-preview:hover{transform:translateY(-8px)}
+
+/* =========================
+   فاصل
+   ========================= */
+.divider{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent);margin:6px 0;border-radius:2px}
+
+/* =========================
+   الشبكة الرئيسية
+   ========================= */
+.main-grid{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:18px;
+  align-items:start;
+}
+
+/* =========================
+   البطاقات العامة
+   ========================= */
+.panel{
+  padding:18px;
+  border-radius:var(--card-radius);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 6px 20px rgba(2,16,37,0.45);
+}
+
+/* =========================
+   نموذج متعدد الخطوات
+   ========================= */
+.form-panel h2{margin:0 0 6px}
+.muted{color:var(--muted);font-size:0.95rem}
+.small{font-size:0.85rem}
+.note{margin-top:12px;color:var(--muted-2)}
+.steps{display:flex;gap:8px;margin:12px 0}
+.step{width:40px;height:40px;border-radius:10px;background:var(--glass-2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:800}
+.step.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#021025;box-shadow:0 8px 24px rgba(124,77,255,0.08)}
+.field{display:flex;flex-direction:column;margin-bottom:12px}
+.label{font-size:0.9rem;margin-bottom:8px;color:var(--muted)}
+input[type="text"],input[type="number"],select,textarea{
+  padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;outline:none;
+  transition:border-color var(--transition), box-shadow var(--transition), transform 180ms;
+  font-size:0.95rem;
+}
+input::placeholder, textarea::placeholder{color:rgba(255,255,255,0.28)}
+input:focus,textarea:focus,select:focus{border-color:rgba(110,231,249,0.6);box-shadow:0 10px 30px rgba(110,231,249,0.04);transform:translateY(-2px)}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+
+/* =========================
+   واجهة التحليل (Loader)
+   ========================= */
+.analysis-ui{display:flex;align-items:center;justify-content:center;padding:18px}
+.analysis-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
+.loader{display:flex;gap:10px;align-items:center}
+.dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));opacity:0.98;transform:translateY(0);animation:dot-bob 1s infinite ease-in-out}
+.dot.b{animation-delay:0.12s}
+.dot.c{animation-delay:0.24s}
+@keyframes dot-bob{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+.analysis-text{color:var(--muted);font-size:0.95rem}
+
+/* =========================
+   مخرجات الخطة
+   ========================= */
+.plan-output{display:flex;flex-direction:column;gap:12px}
+.plan-meta{display:flex;justify-content:space-between;align-items:center}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.plan-card{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
+.plan-card h3{margin:0 0 8px}
+.plan-section{color:var(--muted);line-height:1.6;max-height:420px;overflow:auto;padding-right:6px}
+.plan-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+
+/* تحسينات صغيرة عند المرور */
+.plan-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-1);transition:transform var(--transition)}
+a.link{color:var(--muted);text-decoration:none}
+a.link:hover{color:var(--accent-1)}
+
+/* =========================
+   حالة فارغة
+   ========================= */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;color:var(--muted)}
+.empty-illustration{font-size:36px;margin-bottom:8px}
+
+/* =========================
+   Confetti بسيط عند النجاح (CSS + JS)
+   ========================= */
+.confetti {
+  position:fixed;
+  pointer-events:none;
+  inset:0;
+  overflow:hidden;
+  z-index:9999;
+}
+.confetti .piece{
+  position:absolute;
+  width:10px;height:16px;
+  opacity:0.95;
+  transform-origin:center;
+  animation:confetti-fall linear forwards;
+  border-radius:2px;
+}
+@keyframes confetti-fall{
+  0%{transform:translateY(-10vh) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* =========================
+   أنيميشنات عامة
+   ========================= */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* =========================
+   أدوات مساعدة واستجابة
+   ========================= */
+.hidden{display:none}
+.glass{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);backdrop-filter: blur(10px) saturate(120%);}
+
+/* =========================
+   استجابة للشاشات الصغيرة
+   ========================= */
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:12px}
+  .main-grid{grid-template-columns:1fr;gap:12px}
+  .plan-grid{grid-template-columns:1fr}
+  .hero-visual{order:-1}
+  .form-panel{order:2}
+  .brand-text .title{font-size:1rem}
+  .hero-title{font-size:1.4rem}
+}
+
+/* =========================
+   تحسينات وصولية (focus)
+   ========================= */
+:focus{outline:2px solid rgba(110,231,249,0.18);outline-offset:3px}
