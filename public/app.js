@@ -1,3 +1,4 @@
+// public/app.js (محسّن — يحتفظ بالمنطق الأساسي ويضيف تحسينات غير متطفلة)
 document.addEventListener('DOMContentLoaded', () => {
   // عناصر DOM بأمان (التحقق من الوجود)
   const openFormBtn = document.getElementById('open-form-btn');
@@ -26,7 +27,67 @@ document.addEventListener('DOMContentLoaded', () => {
   // حماية: إذا لم يوجد النموذج أو الألواح فلا نفعل شيء
   if (!form || stepPanels.length === 0) return;
 
-  // فتح النموذج من الشريط أو الهيرو
+  // --- تحسينات غير متطفلة: toasts, spinner, autosave, aria-live, confetti CSS ---
+  // ننشئ عناصر مساعدة فقط إذا لم تكن موجودة
+  function ensureEl(id, tag = 'div', attrs = {}) {
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement(tag);
+      el.id = id;
+      Object.keys(attrs).forEach(k => el.setAttribute(k, attrs[k]));
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  // Toast root
+  const toastRoot = ensureEl('enh-toast-root');
+  Object.assign(toastRoot.style, {
+    position: 'fixed', right: '18px', bottom: '18px', zIndex: '99999',
+    display: 'flex', flexDirection: 'column', gap: '8px', pointerEvents: 'none'
+  });
+  function showToast(msg, type = 'info', timeout = 4000) {
+    const t = document.createElement('div');
+    t.className = `enh-toast enh-toast-${type}`;
+    t.textContent = msg;
+    Object.assign(t.style, {
+      background: type === 'error' ? '#ff6b6b' : (type === 'success' ? '#8be38b' : '#021025'),
+      color: '#fff', padding: '10px 14px', borderRadius: '8px', boxShadow: '0 6px 18px rgba(2,16,37,0.12)',
+      fontSize: '13px', maxWidth: '320px', pointerEvents: 'auto'
+    });
+    toastRoot.appendChild(t);
+    setTimeout(() => t.style.opacity = '0.01', timeout - 300);
+    setTimeout(() => t.remove(), timeout);
+  }
+
+  // Spinner overlay
+  const spinner = ensureEl('enh-spinner');
+  Object.assign(spinner.style, {
+    position: 'fixed', inset: '0', display: 'none', alignItems: 'center', justifyContent: 'center',
+    background: 'rgba(2,16,37,0.35)', zIndex: '99998'
+  });
+  spinner.innerHTML = `<div style="background:#fff;padding:14px;border-radius:10px;display:flex;gap:12px;align-items:center">
+    <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(90deg,#7c4dff,#6ee7f9);animation:enh-spin 1s linear infinite"></div>
+    <div style="font-family:inherit;color:#021025">جاري إنشاء الخطة…</div>
+  </div>`;
+  const enhStyleId = 'enh-styles';
+  if (!document.getElementById(enhStyleId)) {
+    const style = document.createElement('style');
+    style.id = enhStyleId;
+    style.textContent = `
+      @keyframes enh-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+      .confetti { position: fixed; inset: 0; pointer-events: none; overflow: visible; z-index: 99997 }
+      .confetti .piece { position: absolute; will-change: transform, opacity; animation-name: enh-confetti-fall; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+      @keyframes enh-confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity:1 } 100% { transform: translateY(110vh) rotate(720deg); opacity:0.01 } }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // aria-live region لتحسين الوصولية
+  const liveRegion = ensureEl('enh-aria-live', 'div', { 'aria-live': 'polite', 'aria-atomic': 'true' });
+  Object.assign(liveRegion.style, { position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' });
+
+  // --- فتح النموذج من الشريط أو الهيرو ---
   [openFormBtn, heroStart].forEach(btn => {
     if (!btn || !orderPanel) return;
     btn.addEventListener('click', () => {
@@ -77,6 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = form.querySelector('[type="submit"]');
       if (submitBtn) submitBtn.disabled = isBusy;
     }
+    // Spinner و live region
+    showSpinner(isBusy);
+    liveRegion.textContent = isBusy ? 'المعالجة جارية' : 'جاهز';
   }
 
   // تحويل نص إلى HTML آمن (تحويل فقرات)
@@ -89,9 +153,86 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(text).split(/\n{1,}/).map(p => `<p>${escapeHtml(p)}</p>`).join('');
   }
 
+  // --- Autosave (مسودة) في localStorage ---
+  const AUTO_SAVE_KEY = 'bizintel_draft_v1';
+  try {
+    const raw = localStorage.getItem(AUTO_SAVE_KEY);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      Object.keys(draft).forEach(k => {
+        const el = form.elements[k];
+        if (el) el.value = draft[k];
+      });
+      showToast('تم استعادة مسودة سابقة.', 'info', 2200);
+    }
+  } catch (e) { /* تجاهل أخطاء التخزين */ }
+
+  let saveTimer = null;
+  form.addEventListener('input', () => {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = v;
+      try { localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(obj)); } catch (e) {}
+      liveRegion.textContent = 'تم حفظ المسودة محليًا.';
+    }, 1200);
+  });
+
+  // زر لمسح المسودة إن وُجد
+  const clearDraftBtn = document.getElementById('clear-draft-btn');
+  if (clearDraftBtn) {
+    clearDraftBtn.addEventListener('click', () => {
+      localStorage.removeItem(AUTO_SAVE_KEY);
+      showToast('تم مسح المسودة المحلية.', 'success', 2000);
+    });
+  }
+
+  // --- fetch with timeout & retry (client-side helper) ---
+  async function fetchWithTimeout(url, opts = {}, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const merged = Object.assign({}, opts, { signal: controller.signal });
+      const resp = await fetch(url, merged);
+      clearTimeout(id);
+      return resp;
+    } catch (err) {
+      clearTimeout(id);
+      throw err;
+    }
+  }
+  async function fetchWithRetry(url, opts = {}, retries = 2, baseDelay = 700) {
+    let attempt = 0;
+    let lastErr = null;
+    while (attempt <= retries) {
+      try {
+        const resp = await fetchWithTimeout(url, opts, 30000);
+        if (!resp.ok) {
+          const txt = await resp.text().catch(() => '');
+          throw new Error(txt || `HTTP ${resp.status}`);
+        }
+        return resp;
+      } catch (err) {
+        lastErr = err;
+        attempt += 1;
+        if (attempt > retries) break;
+        await new Promise(r => setTimeout(r, baseDelay * attempt));
+      }
+    }
+    throw lastErr;
+  }
+
   // إرسال النموذج
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // منع الإرسال المتكرر محليًا
+    if (form.dataset.submitting === '1') {
+      showToast('العملية جارية بالفعل. الرجاء الانتظار...', 'info', 1800);
+      return;
+    }
+    form.dataset.submitting = '1';
 
     // جمع البيانات من الحقول بأمان (يدعم أسماء الحقول داخل form)
     const fd = new FormData(form);
@@ -106,34 +247,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // تحقق بسيط
     if (!data.businessName || !data.industry || !data.goals || !data.challenges) {
       alert('يرجى إكمال الحقول المطلوبة.');
+      delete form.dataset.submitting;
       return;
     }
 
     // واجهة: عرض حالة التحليل
     if (planEmpty) planEmpty.classList.add('hidden');
     if (planOutput) planOutput.classList.add('hidden');
-    if (analysisUI) analysisUI.classList.remove('hidden');
+    if (analysisUI) {
+      analysisUI.classList.remove('hidden');
+      analysisUI.setAttribute('aria-hidden', 'false');
+    }
     setUiBusy(true);
+    liveRegion.textContent = 'جاري إرسال البيانات إلى الخادم.';
 
-    // استخدم AbortController لمهلة الشبكة
-    const controller = new AbortController();
-    const timeoutMs = 30000; // 30 ثانية
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
+    // نستخدم fetchWithRetry لنداء /api/generate (يحوي مهلة وإعادة محاولة)
     try {
-      const resp = await fetch('/api/generate', {
+      const resp = await fetchWithRetry('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!resp.ok) {
-        const errText = await resp.text().catch(() => '');
-        throw new Error(errText || 'خطأ في الخادم');
-      }
+        body: JSON.stringify(data)
+      }, 2, 800);
 
       const result = await resp.json();
 
@@ -142,6 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Confetti عند النجاح
       runConfetti();
+      showToast('تم إنشاء الخطة بنجاح!', 'success', 2200);
+      liveRegion.textContent = 'تم إنشاء الخطة بنجاح.';
+      // بعد نجاح الإنشاء، نحذف المسودة المحلية
+      try { localStorage.removeItem(AUTO_SAVE_KEY); } catch (e) {}
     } catch (err) {
       console.error('خطأ أثناء التوليد:', err);
       if (err.name === 'AbortError') {
@@ -151,9 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (analysisUI) analysisUI.classList.add('hidden');
       if (planEmpty) planEmpty.classList.remove('hidden');
+      showToast('فشل إنشاء الخطة. تحقق من الاتصال أو حاول لاحقًا.', 'error', 3500);
+      liveRegion.textContent = 'فشل إنشاء الخطة.';
     } finally {
       setUiBusy(false);
-      clearTimeout(timeoutId);
+      delete form.dataset.submitting;
     }
   });
 
@@ -201,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      showToast('تم تنزيل الخطة كملف نصي.', 'success', 1800);
     });
   }
 
@@ -217,7 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const printWindow = window.open('', '_blank', 'width=900,height=700');
         if (!printWindow) {
-          alert('تعذر فتح نافذة الطباعة. تأكد من أن النوافذ المنبثقة مسموح بها.');
+          alert('تعذر فتح نافذة الطباعة. تأكد من السماح للنوافذ المنبثقة.');
+          showToast('تأكد من السماح للنوافذ المنبثقة للطباعة.', 'info', 3500);
           return;
         }
 
@@ -274,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (planEmpty) planEmpty.classList.remove('hidden');
       if (downloadBtn) downloadBtn.disabled = true;
       if (printBtn) printBtn.disabled = true;
+      try { localStorage.removeItem(AUTO_SAVE_KEY); } catch (e) {}
+      showToast('جاهز لبدء خطة جديدة.', 'info', 1400);
     });
   }
 
