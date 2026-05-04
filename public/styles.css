@@ -1,4 +1,3 @@
-
 :root{
   --bg-1: #071029;
   --bg-2: #071a33;
@@ -275,3 +274,93 @@ a.link:hover{color:var(--accent-1)}
    تحسينات وصولية (focus)
    ========================= */
 :focus{outline:2px solid rgba(110,231,249,0.18);outline-offset:3px}
+
+/* =========================
+   ENHANCEMENTS (لا تغيّر الكود الأساسي أعلاه؛ هذا الجزء يربط styles.css مع enhancements.js)
+   - يضيف أنماط للـ toasts, spinner, aria-live, confetti المتوقعة في enhancements.js
+   - ضع هذا الجزء في نهاية الملف لضمان عدم كسر الأنماط الأساسية
+   ========================= */
+
+/* Root helpers for enhancement elements */
+#enh-toast-root {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.enh-toast {
+  pointer-events: auto;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(2,16,37,0.12);
+  font-size: 13px;
+  max-width: 320px;
+  opacity: 1;
+  transition: opacity .3s ease, transform .25s ease;
+}
+.enh-toast-info { background: #021025; }
+.enh-toast-success { background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#021025; }
+.enh-toast-error { background: #ff6b6b; }
+
+/* Spinner overlay (enh-spinner) */
+#enh-spinner {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2,16,37,0.35);
+  z-index: 99998;
+  pointer-events: none;
+}
+#enh-spinner > div {
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 8px 30px rgba(2,16,37,0.12);
+}
+.enh-spinner-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(90deg,#7c4dff,#6ee7f9);
+  animation: enh-spin 1s linear infinite;
+}
+@keyframes enh-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+
+/* aria-live region visually hidden but accessible */
+#enh-aria-live {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* Confetti tweaks (ensure consistent look with JS) */
+.confetti { position: fixed; pointer-events: none; inset: 0; overflow: visible; z-index: 99999; }
+.confetti .piece { position: absolute; width: 10px; height: 16px; opacity: 0.95; transform-origin: center; border-radius: 2px; animation: confetti-fall linear forwards; }
+@keyframes confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity:1 } 100% { transform: translateY(110vh) rotate(720deg); opacity:0 } }
+
+/* Small responsive tweak so toasts don't overflow on tiny screens */
+@media (max-width:420px) {
+  #enh-toast-root { right: 10px; left: 10px; bottom: 12px; }
+  .enh-toast { max-width: calc(100% - 40px); font-size: 12px; padding: 8px 10px; }
+  #enh-spinner > div { padding: 10px; }
+}
+
+/* Accessibility: focus-visible for enhancement controls if ever focusable */
+.enh-toast:focus, .enh-toast:focus-visible { outline: 2px solid rgba(110,231,249,0.18); outline-offset: 3px; }
+
+/* Utility classes used by enhancements.js (keeps parity with existing .hidden) */
+.enh-hidden { display: none !important; }
+
+/* End of enhancements section */
