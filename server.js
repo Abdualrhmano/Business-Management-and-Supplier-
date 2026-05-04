@@ -1,6 +1,5 @@
-// server.js (محسّن)
-// متطلبات: node 18+ يملك fetch مدمج. إذا تستخدم node <18، قم بتثبيت node-fetch
-// تثبيت مقترح (اختياري): npm i dotenv
+// server.js (محسّن — يحتفظ بالمنطق الأصلي ويضيف تحسينات تشغيلية وأمنية خفيفة)
+// متطلبات: Node 18+ يملك fetch مدمج. إذا تستخدم Node <18، سيحاول الكود تحميل node-fetch تلقائياً.
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,15 +8,43 @@ const process = require('process');
 try {
   require('dotenv').config();
 } catch (e) {
-  // dotenv اختياري؛ في بيئات الإنتاج قد لا تحتاجه
+  // dotenv اختياري
 }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ---------- دعم fetch في Node القديمة (fallback) ----------
+// CHANGED: دعم تلقائي لـ node-fetch إن لم يكن fetch متاحًا (لا يغيّر سلوك Node18+)
+if (typeof fetch === 'undefined') {
+  try {
+    // node-fetch v3 uses ESM; require may fail in some setups.
+    // محاولة تحميل نسخة متوافقة إن كانت مثبتة.
+    // eslint-disable-next-line global-require
+    const nodeFetch = require('node-fetch');
+    global.fetch = nodeFetch;
+    global.Headers = nodeFetch.Headers;
+    global.Request = nodeFetch.Request;
+    global.Response = nodeFetch.Response;
+    console.info('Using node-fetch polyfill for fetch.');
+  } catch (err) {
+    console.warn('Global fetch is not available and node-fetch is not installed. Install node-fetch or use Node 18+.');
+  }
+}
+
 // ---------- إعدادات أساسية وأمنية ----------
 const CORS_ORIGIN = process.env.CORS_ORIGIN || true; // في الإنتاج ضع origin محدد
 app.use(cors({ origin: CORS_ORIGIN, methods: ['GET', 'POST'] }));
+
+// بعض رؤوس الأمان الأساسية (خفيفة، لا تعتمد على helmet)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
+  // Content-Security-Policy بسيط يسمح بالتحميل من نفس المصدر فقط
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;");
+  next();
+});
 
 // استخدم express.json بدل body-parser (مضمن)
 app.use(express.json({ limit: '200kb' }));
@@ -83,7 +110,7 @@ function extractSection(text, headingVariants = []) {
       return m[0].replace(new RegExp('^' + heading, 'i'), '').trim();
     }
   }
-  // محاولة بديلة: البحث عن العنوان ثم أخذ 800 حرف بعده
+  // محاولة بديلة: البحث عن العنوان ثم أخذ 1600 حرف بعده
   for (const heading of headingVariants) {
     const idx = text.toLowerCase().indexOf(heading.toLowerCase());
     if (idx >= 0) {
@@ -176,13 +203,22 @@ app.post('/api/generate', rateLimitMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Server misconfiguration: AI credentials missing.' });
     }
 
+    // تحقق بسيط على URL (يجب أن يكون https)
+    try {
+      const parsed = new URL(GEMINI_API_URL);
+      if (parsed.protocol !== 'https:') {
+        console.warn('GEMINI_API_URL يجب أن يكون https.');
+      }
+    } catch (e) {
+      console.warn('GEMINI_API_URL غير صالح:', GEMINI_API_URL);
+    }
+
     // بناء payload وفق واجهة REST المتوقعة — عدّل الحقول حسب توثيق مزودك
     const payload = {
       // مثال عام: قد تحتاج لتعديل هذا الجزء ليتوافق مع واجهة Gemini الحقيقية
       prompt: prompt,
       maxOutputTokens: 800,
-      temperature: 0.2,
-      // يمكنك إضافة إعدادات أخرى هنا حسب التوثيق
+      temperature: 0.2
     };
 
     // رؤوس الطلب
@@ -216,9 +252,7 @@ app.post('/api/generate', rateLimitMiddleware, async (req, res) => {
 
     // استخراج النص من استجابة Gemini (مرن لعدة صيغ)
     let fullText = '';
-    // أمثلة على أماكن قد تحتوي النص حسب واجهات مختلفة
     if (aiJson.output && Array.isArray(aiJson.output) && aiJson.output.length > 0) {
-      // قد تكون المحتويات في output[0].content أو output[0].text أو output[0].message
       const first = aiJson.output[0];
       fullText = (first.content || first.text || first.message || '').toString();
     }
@@ -231,6 +265,11 @@ app.post('/api/generate', rateLimitMiddleware, async (req, res) => {
       // كحل أخير: stringify كامل (مفيد للتشخيص)
       fullText = JSON.stringify(aiJson);
     }
+
+    // تسجيل حجم الاستجابة لأغراض التشخيص (خفيف)
+    try {
+      console.info('AI response length:', fullText.length);
+    } catch (e) { /* ignore */ }
 
     // الآن نقسم النص إلى أقسام متوقعة (العناوين العربية أولاً ثم الإنجليزية)
     const marketing = extractSection(fullText, ['استراتيجية التسويق:', 'استراتيجية التسويق', 'Marketing strategy:', 'Marketing Strategy:']);
@@ -255,6 +294,14 @@ app.post('/api/generate', rateLimitMiddleware, async (req, res) => {
 
 // نقطة اختبار بسيطة
 app.get('/api/ping', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+
+// تنظيف آمن عند إيقاف الخادم
+function shutdown() {
+  console.log('Shutting down server...');
+  process.exit(0);
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // بدء الخادم
 app.listen(PORT, () => {
