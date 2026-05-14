@@ -1,6 +1,4 @@
-// public/app.js (محسّن — يحتفظ بالمنطق الأساسي ويضيف تحسينات غير متطفلة)
 document.addEventListener('DOMContentLoaded', () => {
-  // عناصر DOM بأمان (التحقق من الوجود)
   const openFormBtn = document.getElementById('open-form-btn');
   const heroStart = document.getElementById('hero-start');
   const orderPanel = document.getElementById('order-panel');
@@ -24,11 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const swotEl = document.getElementById('swot');
   const actionsEl = document.getElementById('actions');
 
-  // حماية: إذا لم يوجد النموذج أو الألواح فلا نفعل شيء
   if (!form || stepPanels.length === 0) return;
 
-  // --- تحسينات غير متطفلة: toasts, spinner, autosave, aria-live, confetti CSS ---
-  // ننشئ عناصر مساعدة فقط إذا لم تكن موجودة
   function ensureEl(id, tag = 'div', attrs = {}) {
     let el = document.getElementById(id);
     if (!el) {
@@ -40,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return el;
   }
 
-  // Toast root
   const toastRoot = ensureEl('enh-toast-root');
   Object.assign(toastRoot.style, {
     position: 'fixed', right: '18px', bottom: '18px', zIndex: '99999',
@@ -60,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => t.remove(), timeout);
   }
 
-  // Spinner overlay
   const spinner = ensureEl('enh-spinner');
   Object.assign(spinner.style, {
     position: 'fixed', inset: '0', display: 'none', alignItems: 'center', justifyContent: 'center',
@@ -83,11 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(style);
   }
 
-  // aria-live region لتحسين الوصولية
   const liveRegion = ensureEl('enh-aria-live', 'div', { 'aria-live': 'polite', 'aria-atomic': 'true' });
   Object.assign(liveRegion.style, { position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' });
 
-  // --- فتح النموذج من الشريط أو الهيرو ---
   [openFormBtn, heroStart].forEach(btn => {
     if (!btn || !orderPanel) return;
     btn.addEventListener('click', () => {
@@ -96,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // متعدد الخطوات مع انتقالات بسيطة
   let currentStep = 1;
   const totalSteps = stepPanels.length;
 
@@ -130,7 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   showStep(1);
 
-  // مساعدة: تعطيل/تمكين عناصر واجهة
+  function showSpinner(show) {
+    if (spinner) spinner.style.display = show ? 'flex' : 'none';
+  }
+
   function setUiBusy(isBusy) {
     const allControls = [downloadBtn, printBtn, ...nextBtns, ...prevBtns];
     allControls.forEach(c => { if (c) c.disabled = isBusy; });
@@ -138,12 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitBtn = form.querySelector('[type="submit"]');
       if (submitBtn) submitBtn.disabled = isBusy;
     }
-    // Spinner و live region
     showSpinner(isBusy);
     liveRegion.textContent = isBusy ? 'المعالجة جارية' : 'جاهز';
   }
 
-  // تحويل نص إلى HTML آمن (تحويل فقرات)
   function escapeHtml(str) {
     if (!str && str !== '') return '';
     return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -153,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(text).split(/\n{1,}/).map(p => `<p>${escapeHtml(p)}</p>`).join('');
   }
 
-  // --- Autosave (مسودة) في localStorage ---
   const AUTO_SAVE_KEY = 'bizintel_draft_v1';
   try {
     const raw = localStorage.getItem(AUTO_SAVE_KEY);
@@ -165,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       showToast('تم استعادة مسودة سابقة.', 'info', 2200);
     }
-  } catch (e) { /* تجاهل أخطاء التخزين */ }
+  } catch (e) {}
 
   let saveTimer = null;
   form.addEventListener('input', () => {
@@ -179,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1200);
   });
 
-  // زر لمسح المسودة إن وُجد
   const clearDraftBtn = document.getElementById('clear-draft-btn');
   if (clearDraftBtn) {
     clearDraftBtn.addEventListener('click', () => {
@@ -188,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- fetch with timeout & retry (client-side helper) ---
   async function fetchWithTimeout(url, opts = {}, timeoutMs = 30000) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -223,18 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
     throw lastErr;
   }
 
-  // إرسال النموذج
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // منع الإرسال المتكرر محليًا
     if (form.dataset.submitting === '1') {
       showToast('العملية جارية بالفعل. الرجاء الانتظار...', 'info', 1800);
       return;
     }
     form.dataset.submitting = '1';
 
-    // جمع البيانات من الحقول بأمان (يدعم أسماء الحقول داخل form)
     const fd = new FormData(form);
     const data = {
       businessName: (fd.get('businessName') || '').toString().trim(),
@@ -244,14 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
       challenges: (fd.get('challenges') || '').toString().trim()
     };
 
-    // تحقق بسيط
     if (!data.businessName || !data.industry || !data.goals || !data.challenges) {
       alert('يرجى إكمال الحقول المطلوبة.');
       delete form.dataset.submitting;
       return;
     }
 
-    // واجهة: عرض حالة التحليل
     if (planEmpty) planEmpty.classList.add('hidden');
     if (planOutput) planOutput.classList.add('hidden');
     if (analysisUI) {
@@ -261,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setUiBusy(true);
     liveRegion.textContent = 'جاري إرسال البيانات إلى الخادم.';
 
-    // نستخدم fetchWithRetry لنداء /api/generate (يحوي مهلة وإعادة محاولة)
     try {
       const resp = await fetchWithRetry('/api/generate', {
         method: 'POST',
@@ -271,14 +252,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await resp.json();
 
-      // عرض الخطة
       renderPlan(result, data);
 
-      // Confetti عند النجاح
       runConfetti();
       showToast('تم إنشاء الخطة بنجاح!', 'success', 2200);
       liveRegion.textContent = 'تم إنشاء الخطة بنجاح.';
-      // بعد نجاح الإنشاء، نحذف المسودة المحلية
       try { localStorage.removeItem(AUTO_SAVE_KEY); } catch (e) {}
     } catch (err) {
       console.error('خطأ أثناء التوليد:', err);
@@ -313,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (printBtn) printBtn.disabled = false;
   }
 
-  // تحميل كملف نصي
   if (downloadBtn) {
     downloadBtn.addEventListener('click', () => {
       const title = `${(metaBusiness && metaBusiness.textContent) || 'business-plan'}`.replace(/\s+/g, '-').toLowerCase();
@@ -345,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // طباعة الخطة
   if (printBtn) {
     printBtn.addEventListener('click', () => {
       try {
@@ -402,7 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // تحسين / خطة جديدة
   if (refineBtn && orderPanel) {
     refineBtn.addEventListener('click', () => {
       orderPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -421,7 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Confetti بسيط مع تنظيف آمن
   function runConfetti() {
     const confetti = document.createElement('div');
     confetti.className = 'confetti';
@@ -441,13 +415,11 @@ document.addEventListener('DOMContentLoaded', () => {
       p.style.transform = `rotate(${Math.random() * 360}deg)`;
       confetti.appendChild(p);
     }
-    // إزالة بعد انتهاء الأنيميشن أو بعد مهلة احتياطية
     const removeConfetti = () => { if (confetti && confetti.parentNode) confetti.parentNode.removeChild(confetti); };
     confetti.addEventListener('animationend', removeConfetti, { once: true });
     setTimeout(removeConfetti, 4500);
   }
 
-  // سنة الفوتر
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
