@@ -3,19 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>منصة ذكاء وتخطيط للأعمال الصغيرة — BizIntel</title>
-
-  <!-- Cairo + Tajawal -->
+  <title>Business Planning — منصة تخطيط الأعمال</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-  <!-- ملف CSS واحد -->
   <link rel="stylesheet" href="styles.css" />
-
+  <meta name="author" content="Abdualrhman" />
   <meta name="theme-color" content="#071029" />
 </head>
 <body>
   <main class="app" id="app">
-    <!-- شريط علوي -->
     <header class="topbar" role="banner">
       <div class="brand">
         <svg class="logo" viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
@@ -28,21 +23,19 @@
           <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#g)"></rect>
         </svg>
         <div class="brand-text">
-          <div class="title">BizIntel</div>
-          <div class="subtitle">ذكاء وتخطيط للأعمال الصغيرة</div>
+          <div class="title">Business Planning</div>
+          <div class="subtitle">منصة تخطيط الأعمال الصغيرة</div>
         </div>
       </div>
-
       <nav class="nav-actions" aria-label="أزرار رئيسية">
         <button class="btn ghost" id="open-form-btn" aria-controls="order-panel">ابدأ خطة</button>
       </nav>
     </header>
 
-    <!-- HERO -->
     <section class="hero" id="hero">
       <div class="hero-inner">
         <h1 class="hero-title">حوّل الرؤى إلى خطوات قابلة للتنفيذ</h1>
-        <p class="hero-lead">خطة أعمال احترافية مُخصّصة: استراتيجية تسويق، تحليل SWOT، وخطوات تنفيذية خلال 90 يومًا — مدعومة بـ Gemini Pro.</p>
+        <p class="hero-lead">خطة أعمال احترافية مُخصّصة: استراتيجية تسويق، تحليل SWOT، وخطوات تنفيذية خلال 90 يومًا.</p>
         <div class="hero-cta">
           <button class="btn primary" id="hero-start">ابدأ خطتك الآن</button>
           <a class="link muted" href="#how-it-works">كيف يعمل</a>
@@ -68,12 +61,10 @@
 
     <hr class="divider" />
 
-    <!-- شبكة رئيسية: نموذج + لوحة النتائج -->
     <section class="main-grid" id="main-grid">
-      <!-- نموذج متعدد الخطوات -->
       <aside class="panel glass form-panel" id="order-panel" aria-labelledby="form-heading">
         <h2 id="form-heading">نموذج الطلب</h2>
-        <p.class="muted">أخبرنا عن عملك لنقدّم خطة مهنية ومُنفّذة.</p>
+        <p class="muted">أخبرنا عن عملك لنقدّم خطة مهنية ومُنفّذة.</p>
 
         <form id="multi-step-form" novalidate autocomplete="off">
           <div class="steps" role="tablist" aria-label="مراحل النموذج">
@@ -82,7 +73,6 @@
             <div class="step" data-step="3" role="tab" aria-selected="false">3</div>
           </div>
 
-          <!-- خطوة 1 -->
           <fieldset class="step-panel" data-step="1">
             <label class="field">
               <span class="label">اسم النشاط التجاري</span>
@@ -107,7 +97,6 @@
             </div>
           </fieldset>
 
-          <!-- خطوة 2 -->
           <fieldset class="step-panel" data-step="2" hidden>
             <label class="field">
               <span class="label">الميزانية الشهرية (USD)</span>
@@ -125,7 +114,6 @@
             </div>
           </fieldset>
 
-          <!-- خطوة 3 -->
           <fieldset class="step-panel" data-step="3" hidden>
             <label class="field">
               <span class="label">التحديات الحالية</span>
@@ -140,9 +128,10 @@
         </form>
 
         <div class="small muted note">نحترم خصوصيتك: لا نخزن بياناتك الخام على الخادم العام. يتم الاحتفاظ بالخطة الناتجة فقط خلال الجلسة.</div>
+
+        <button type="button" class="btn ghost small" id="clear-draft-btn" style="margin-top: 10px; font-size: 12px;">مسح المسودة</button>
       </aside>
 
-      <!-- لوحة النتائج -->
       <section class="panel glass output-panel" id="output-panel" aria-live="polite">
         <div class="output-header">
           <h2>الخطة المولّدة</h2>
@@ -152,10 +141,9 @@
           </div>
         </div>
 
-        <!-- واجهة التحليل (حالة العمل مع Gemini) -->
         <div id="analysis-ui" class="analysis-ui hidden" aria-hidden="true">
           <div class="analysis-card">
-            <div class="analysis-title">جارٍ التحليل بواسطة Gemini Pro</div>
+            <div class="analysis-title">جارٍ التحليل</div>
             <div class="analysis-body">
               <div class="loader" aria-hidden="true">
                 <div class="dot a"></div>
@@ -167,7 +155,6 @@
           </div>
         </div>
 
-        <!-- مخرجات الخطة -->
         <div id="plan-output" class="plan-output hidden">
           <div class="plan-meta">
             <div><strong id="meta-business"></strong> — <span id="meta-industry" class="muted"></span></div>
@@ -197,7 +184,6 @@
           </div>
         </div>
 
-        <!-- حالة فارغة -->
         <div id="empty-state" class="empty-state">
           <div class="empty-illustration">🧭</div>
           <div class="empty-text">لا توجد خطة بعد. ابدأ نموذج الطلب للحصول على خطة مخصصة.</div>
@@ -206,14 +192,12 @@
     </section>
 
     <footer class="footer" role="contentinfo">
-      <div>© <span id="year"></span> BizIntel — تصميم عصري</div>
+      <div>© <span id="year"></span> Business Planning — تصميم عصري</div>
       <div class="muted">Glassmorphism · ثيم أزرق غامق</div>
     </footer>
   </main>
 
-  <!-- ملف جافاسكربت منفصل -->
   <script src="app.js" defer></script>
-  <!-- enhancements.js يُحمّل بعد app.js ليدمج التحسينات دون تغيير الكود الأساسي -->
   <script src="enhancements.js" defer></script>
 </body>
-                  </html>
+</html>
