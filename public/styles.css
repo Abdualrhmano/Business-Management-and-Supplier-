@@ -1,29 +1,33 @@
 :root{
-  --bg-1: #071029;
-  --bg-2: #071a33;
-  --glass-1: rgba(255,255,255,0.04);
-  --glass-2: rgba(255,255,255,0.02);
-  --accent-1: #6EE7F9;
-  --accent-2: #7C4DFF;
-  --muted: rgba(255,255,255,0.68);
-  --muted-2: rgba(255,255,255,0.48);
-  --card-radius: 16px;
-  --transition: 260ms cubic-bezier(.2,.9,.2,1);
-  --shadow-1: 0 8px 30px rgba(2,16,37,0.6);
-  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color-scheme: dark;
-  color: #eaf6ff;
+  --bg-1:#071029;
+  --bg-2:#071a33;
+  --panel-bg:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --glass-1:rgba(255,255,255,0.04);
+  --glass-2:rgba(255,255,255,0.02);
+  --accent-1:#6EE7F9;
+  --accent-2:#7C4DFF;
+  --success:#8BE38B;
+  --danger:#FF6B6B;
+  --muted:rgba(255,255,255,0.68);
+  --muted-2:rgba(255,255,255,0.48);
+  --card-radius:16px;
+  --transition:260ms cubic-bezier(.2,.9,.2,1);
+  --shadow-1:0 8px 30px rgba(2,16,37,0.6);
+  font-family:'Tajawal','Cairo',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:dark;
+  color:#eaf6ff;
+  --kpi-bg:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+  --kpi-border:rgba(110,231,249,0.06);
+  --dashboard-gap:18px;
+  --max-content-width:1200px;
 }
 
-/* =========================
-   قواعد أساسية
-   ========================= */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0;
   background:
-    radial-gradient(900px 400px at 10% 10%, rgba(124,77,255,0.08), transparent 8%),
+    radial-gradient(900px 400px at 10% 10%, rgba(124,77,255,0.06), transparent 8%),
     linear-gradient(180deg,var(--bg-1),var(--bg-2));
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -31,31 +35,25 @@ body{
   line-height:1.45;
 }
 
-/* =========================
-   حاوية التطبيق
-   ========================= */
 .app{
-  max-width:1200px;
+  max-width:var(--max-content-width);
   margin:0 auto;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:var(--dashboard-gap);
   min-height:calc(100vh - 40px);
   animation:fadeInUp 700ms ease both;
 }
 
-/* =========================
-   شريط علوي
-   ========================= */
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
   padding:12px 16px;
   border-radius:12px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background:var(--panel-bg);
   border:1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter:blur(10px) saturate(120%);
   transform:translateZ(0);
 }
 .brand{display:flex;gap:12px;align-items:center}
@@ -63,9 +61,6 @@ body{
 .brand-text .title{font-weight:700;font-size:1.05rem}
 .brand-text .subtitle{font-size:0.78rem;color:var(--muted);margin-top:-2px}
 
-/* =========================
-   أزرار عامة
-   ========================= */
 .btn{
   border:0;
   padding:10px 14px;
@@ -79,27 +74,24 @@ body{
 }
 .btn:hover{transform:translateY(-4px)}
 .btn.primary{
-  background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
   color:#021025;
-  box-shadow: 0 10px 30px rgba(124,77,255,0.12);
+  box-shadow:0 10px 30px rgba(124,77,255,0.12);
 }
 .btn.ghost{
   background:transparent;
   border:1px solid rgba(255,255,255,0.06);
 }
 
-/* =========================
-   قسم البطل مع أنيميشن خلفية ناعمة
-   ========================= */
 .hero{
   display:grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns:1fr 360px;
   gap:20px;
   align-items:center;
   padding:18px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,0.03);
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  background:var(--panel-bg);
   position:relative;
   overflow:hidden;
 }
@@ -108,8 +100,7 @@ body{
   position:absolute;
   inset:-20% -10% auto auto;
   width:600px;height:600px;
-  background:radial-gradient(circle at 30% 30%, rgba(110,231,249,0.06), transparent 20%),
-             radial-gradient(circle at 70% 70%, rgba(124,77,255,0.05), transparent 18%);
+  background:radial-gradient(circle at 30% 30%, rgba(110,231,249,0.05), transparent 20%),radial-gradient(circle at 70% 70%, rgba(124,77,255,0.04), transparent 18%);
   transform:translateX(-10%);
   animation:heroFloat 8s ease-in-out infinite;
   pointer-events:none;
@@ -124,50 +115,37 @@ body{
 .hero-lead{color:var(--muted);margin:0 0 16px}
 .hero-cta{display:flex;gap:12px;align-items:center}
 
-/* بطاقة معاينة */
 .hero-visual{padding:18px;border-radius:16px;display:flex;align-items:center;justify-content:center}
 .card-preview{
   width:100%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background:var(--kpi-bg);
   border-radius:12px;
   padding:14px;
-  border:1px solid rgba(255,255,255,0.04);
-  box-shadow: 0 8px 30px rgba(2,16,37,0.45);
+  border:1px solid var(--kpi-border);
+  box-shadow:0 8px 30px rgba(2,16,37,0.35);
   transform:translateY(0);
   transition:transform 420ms ease;
 }
 .card-preview:hover{transform:translateY(-8px)}
 
-/* =========================
-   فاصل
-   ========================= */
 .divider{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent);margin:6px 0;border-radius:2px}
 
-/* =========================
-   الشبكة الرئيسية
-   ========================= */
 .main-grid{
   display:grid;
-  grid-template-columns: 360px 1fr;
-  gap:18px;
+  grid-template-columns:360px 1fr;
+  gap:var(--dashboard-gap);
   align-items:start;
 }
 
-/* =========================
-   البطاقات العامة
-   ========================= */
 .panel{
   padding:18px;
   border-radius:var(--card-radius);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background:var(--panel-bg);
   border:1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(10px) saturate(120%);
-  box-shadow: 0 6px 20px rgba(2,16,37,0.45);
+  backdrop-filter:blur(10px) saturate(120%);
+  box-shadow:0 6px 20px rgba(2,16,37,0.45);
 }
 
-/* =========================
-   نموذج متعدد الخطوات
-   ========================= */
 .form-panel h2{margin:0 0 6px}
 .muted{color:var(--muted);font-size:0.95rem}
 .small{font-size:0.85rem}
@@ -182,13 +160,39 @@ input[type="text"],input[type="number"],select,textarea{
   transition:border-color var(--transition), box-shadow var(--transition), transform 180ms;
   font-size:0.95rem;
 }
-input::placeholder, textarea::placeholder{color:rgba(255,255,255,0.28)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.28)}
 input:focus,textarea:focus,select:focus{border-color:rgba(110,231,249,0.6);box-shadow:0 10px 30px rgba(110,231,249,0.04);transform:translateY(-2px)}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
 
-/* =========================
-   واجهة التحليل (Loader)
-   ========================= */
+.output-panel{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+  border-left:4px solid rgba(110,231,249,0.06);
+  padding:18px;
+}
+.output-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.output-actions{display:flex;gap:8px;align-items:center}
+
+.kpi-row{
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+  width:100%;
+}
+.kpi{
+  flex:1 1 0;
+  padding:12px;
+  border-radius:12px;
+  background:var(--kpi-bg);
+  border:1px solid var(--kpi-border);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.kpi .kpi-value{font-size:1.25rem;font-weight:800;color:#eaf6ff}
+.kpi .kpi-label{font-size:0.85rem;color:var(--muted)}
+
 .analysis-ui{display:flex;align-items:center;justify-content:center;padding:18px}
 .analysis-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
 .loader{display:flex;gap:10px;align-items:center}
@@ -198,68 +202,58 @@ input:focus,textarea:focus,select:focus{border-color:rgba(110,231,249,0.6);box-s
 @keyframes dot-bob{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
 .analysis-text{color:var(--muted);font-size:0.95rem}
 
-/* =========================
-   مخرجات الخطة
-   ========================= */
 .plan-output{display:flex;flex-direction:column;gap:12px}
-.plan-meta{display:flex;justify-content:space-between;align-items:center}
+.plan-meta{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.status-pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px;background:#0f1724;color:#9ef0ff;border:1px solid rgba(110,231,249,0.08)}
 .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .plan-card{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
 .plan-card h3{margin:0 0 8px}
-.plan-section{color:var(--muted);line-height:1.6;max-height:420px;overflow:auto;padding-right:6px}
-.plan-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.plan-section{color:var(--muted);line-height:1.6;max-height:420px;overflow:auto;padding-right:6px;white-space:pre-wrap}
 
-/* تحسينات صغيرة عند المرور */
-.plan-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-1);transition:transform var(--transition)}
-a.link{color:var(--muted);text-decoration:none}
-a.link:hover{color:var(--accent-1)}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.95rem;
+}
+.table th, .table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  text-align:right;
+  color:var(--muted);
+}
+.table th{font-weight:700;color:#dff6ff;font-size:0.85rem}
+.table tr:hover td{background:rgba(255,255,255,0.01)}
 
-/* =========================
-   حالة فارغة
-   ========================= */
+.chart-placeholder{
+  height:120px;
+  border-radius:10px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  border:1px solid rgba(255,255,255,0.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:0.95rem;
+}
+
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;color:var(--muted)}
 .empty-illustration{font-size:36px;margin-bottom:8px}
 
-/* =========================
-   Confetti بسيط عند النجاح (CSS + JS)
-   ========================= */
-.confetti {
-  position:fixed;
-  pointer-events:none;
-  inset:0;
-  overflow:hidden;
-  z-index:9999;
-}
-.confetti .piece{
-  position:absolute;
-  width:10px;height:16px;
-  opacity:0.95;
-  transform-origin:center;
-  animation:confetti-fall linear forwards;
-  border-radius:2px;
-}
-@keyframes confetti-fall{
-  0%{transform:translateY(-10vh) rotate(0deg);opacity:1}
-  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
-}
+.confetti{position:fixed;pointer-events:none;inset:0;overflow:hidden;z-index:9999}
+.confetti .piece{position:absolute;width:10px;height:16px;opacity:0.95;transform-origin:center;animation:confetti-fall linear forwards;border-radius:2px}
+@keyframes confetti-fall{0%{transform:translateY(-10vh) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 
-/* =========================
-   أنيميشنات عامة
-   ========================= */
-@keyframes fadeInUp{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:translateY(0)}
-}
+#enh-toast-root{position:fixed;right:18px;bottom:18px;z-index:100000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.enh-toast{pointer-events:auto;color:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 6px 18px rgba(2,16,37,0.12);font-size:13px;max-width:320px;opacity:1;transition:opacity .3s ease, transform .25s ease}
+.enh-toast-info{background:#021025}
+.enh-toast-success{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#021025}
+.enh-toast-error{background:var(--danger)}
+#enh-spinner{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,16,37,0.35);z-index:99998;pointer-events:none}
+#enh-spinner>div{background:#fff;padding:14px;border-radius:10px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 30px rgba(2,16,37,0.12)}
+.enh-spinner-dot{width:34px;height:34px;border-radius:50%;background:linear-gradient(90deg,#7c4dff,#6ee7f9);animation:enh-spin 1s linear infinite}
+@keyframes enh-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+#enh-aria-live{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 
-/* =========================
-   أدوات مساعدة واستجابة
-   ========================= */
-.hidden{display:none}
-.glass{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);backdrop-filter: blur(10px) saturate(120%);}
-
-/* =========================
-   استجابة للشاشات الصغيرة
-   ========================= */
 @media (max-width:980px){
   .hero{grid-template-columns:1fr;gap:12px}
   .main-grid{grid-template-columns:1fr;gap:12px}
@@ -268,99 +262,7 @@ a.link:hover{color:var(--accent-1)}
   .form-panel{order:2}
   .brand-text .title{font-size:1rem}
   .hero-title{font-size:1.4rem}
+  .kpi-row{flex-direction:column}
 }
 
-/* =========================
-   تحسينات وصولية (focus)
-   ========================= */
 :focus{outline:2px solid rgba(110,231,249,0.18);outline-offset:3px}
-
-/* =========================
-   ENHANCEMENTS (لا تغيّر الكود الأساسي أعلاه؛ هذا الجزء يربط styles.css مع enhancements.js)
-   - يضيف أنماط للـ toasts, spinner, aria-live, confetti المتوقعة في enhancements.js
-   - ضع هذا الجزء في نهاية الملف لضمان عدم كسر الأنماط الأساسية
-   ========================= */
-
-/* Root helpers for enhancement elements */
-#enh-toast-root {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 100000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-.enh-toast {
-  pointer-events: auto;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(2,16,37,0.12);
-  font-size: 13px;
-  max-width: 320px;
-  opacity: 1;
-  transition: opacity .3s ease, transform .25s ease;
-}
-.enh-toast-info { background: #021025; }
-.enh-toast-success { background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#021025; }
-.enh-toast-error { background: #ff6b6b; }
-
-/* Spinner overlay (enh-spinner) */
-#enh-spinner {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2,16,37,0.35);
-  z-index: 99998;
-  pointer-events: none;
-}
-#enh-spinner > div {
-  background: #fff;
-  padding: 14px;
-  border-radius: 10px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  box-shadow: 0 8px 30px rgba(2,16,37,0.12);
-}
-.enh-spinner-dot {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(90deg,#7c4dff,#6ee7f9);
-  animation: enh-spin 1s linear infinite;
-}
-@keyframes enh-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
-
-/* aria-live region visually hidden but accessible */
-#enh-aria-live {
-  position: absolute !important;
-  left: -9999px !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-}
-
-/* Confetti tweaks (ensure consistent look with JS) */
-.confetti { position: fixed; pointer-events: none; inset: 0; overflow: visible; z-index: 99999; }
-.confetti .piece { position: absolute; width: 10px; height: 16px; opacity: 0.95; transform-origin: center; border-radius: 2px; animation: confetti-fall linear forwards; }
-@keyframes confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity:1 } 100% { transform: translateY(110vh) rotate(720deg); opacity:0 } }
-
-/* Small responsive tweak so toasts don't overflow on tiny screens */
-@media (max-width:420px) {
-  #enh-toast-root { right: 10px; left: 10px; bottom: 12px; }
-  .enh-toast { max-width: calc(100% - 40px); font-size: 12px; padding: 8px 10px; }
-  #enh-spinner > div { padding: 10px; }
-}
-
-/* Accessibility: focus-visible for enhancement controls if ever focusable */
-.enh-toast:focus, .enh-toast:focus-visible { outline: 2px solid rgba(110,231,249,0.18); outline-offset: 3px; }
-
-/* Utility classes used by enhancements.js (keeps parity with existing .hidden) */
-.enh-hidden { display: none !important; }
-
-/* End of enhancements section */
